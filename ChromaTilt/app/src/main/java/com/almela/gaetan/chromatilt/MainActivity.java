@@ -1,6 +1,8 @@
 package com.almela.gaetan.chromatilt;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,6 +16,8 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Size;
@@ -90,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
     Surface previewSurface;
+    private static final int CAMERA_REQUEST_CODE = 9843;
 
 
     @Override
@@ -108,6 +113,18 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == CAMERA_REQUEST_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                openCamera();
+            else
+                Toast.makeText(this, "Camera permission denied", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -160,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 cameraManager.openCamera(mCameraId, mCameraDeviceStateCallback, null);
             } catch (SecurityException e) {
-                e.printStackTrace();
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
