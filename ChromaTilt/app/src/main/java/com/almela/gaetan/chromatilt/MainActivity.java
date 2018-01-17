@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        renderer = new GLRenderer();
+        renderer = new GLRenderer(this);
         mSurfaceView = new FilterGLSurfaceView(this);
         mSurfaceView.setEGLContextClientVersion(2);
         mSurfaceView.setRenderer(renderer);

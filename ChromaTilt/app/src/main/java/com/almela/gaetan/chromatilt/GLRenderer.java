@@ -8,14 +8,16 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.util.DisplayMetrics;
-import android.view.Display;
-import android.view.WindowManager;
-import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -26,12 +28,20 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAvailableListener {
 
+    private float LSlider = 1.0f;//Controls the amount of shifting in each cone. (Cool huh?)
+    private float MSlider = 0.0f;
+    private float SSlider = 0.0f;
+
     private int mProgramObject;
 
     private int mPositionLoc;
     private int mTexCoordLoc;
 
     private int mSamplerLoc;
+
+    private int mLSliderLoc;
+    private int mMSliderLoc;
+    private int mSSliderLoc;
 
     private int mTextureId = -1;
 
@@ -48,6 +58,15 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
             };
 
     Bitmap cameraImage;
+
+    MainActivity activity;
+
+    List<Button> buttons;
+
+    public GLRenderer(MainActivity activity) {
+        this.activity = activity;
+        buttons = new ArrayList<>();
+    }
 
     public void setAspectRatio(DisplayMetrics displayMetrics, float aspectRatio) {
         float xOff = ((float)displayMetrics.heightPixels * aspectRatio) / (float) displayMetrics.widthPixels;
@@ -110,26 +129,32 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
         mTextureId = textureId[0];
     }
 
+    private String readFile(String file) {
+        BufferedReader reader = null;
+        String fileContents = "";
+        try {
+            reader = new BufferedReader(new InputStreamReader(activity.getAssets().open(file)));
+            String mLine;
+            while ((mLine = reader.readLine()) != null) {
+                fileContents += mLine + "\n";
+            }
+        } catch(IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(reader != null)
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+        return fileContents;
+    }
+
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
     {
-        String vShaderStr =
-                "attribute vec4 a_position;   \n"
-                        + "attribute vec2 a_texCoord;   \n"
-                        + "varying vec2 v_texCoord;     \n"
-                        + "void main()                  \n"
-                        + "{                            \n"
-                        + "   gl_Position = a_position; \n"
-                        + "   v_texCoord = a_texCoord;  \n"
-                        + "}                            \n";
-
-        String fShaderStr =
-                "precision mediump float;                            \n"
-                        + "varying vec2 v_texCoord;                            \n"
-                        + "uniform sampler2D s_texture;                        \n"
-                        + "void main()                                         \n"
-                        + "{                                                   \n"
-                        + "  gl_FragColor = texture2D( s_texture, v_texCoord );\n"
-                        + "}                                                   \n";
+        String vShaderStr = readFile("shader.vert");
+        String fShaderStr = readFile("shader.frag");
 
         int vShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         GLES20.glShaderSource(vShader, vShaderStr);
@@ -153,6 +178,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
         mTexCoordLoc = GLES20.glGetAttribLocation(mProgramObject, "a_texCoord");
 
         mSamplerLoc = GLES20.glGetUniformLocation(mProgramObject, "s_texture");
+
+        mLSliderLoc = GLES20.glGetUniformLocation(mProgramObject, "LShift");
+        mMSliderLoc = GLES20.glGetUniformLocation(mProgramObject, "MShift");
+        mSSliderLoc = GLES20.glGetUniformLocation(mProgramObject, "SShift");
 
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     }
@@ -182,6 +211,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
 
         GLES20.glActiveTexture ( GLES20.GL_TEXTURE0 );
         GLES20.glBindTexture ( GLES20.GL_TEXTURE_2D, mTextureId );
+
+        GLES20.glUniform1f(mLSliderLoc, LSlider);//Bind that shit yo
+        GLES20.glUniform1f(mMSliderLoc, MSlider);
+        GLES20.glUniform1f(mSSliderLoc, SSlider);
 
         GLES20.glUniform1i ( mSamplerLoc, 0 );
 
