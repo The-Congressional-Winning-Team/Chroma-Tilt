@@ -3,13 +3,18 @@ package com.almela.gaetan.chromatilt;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
+import android.support.constraint.solver.widgets.Rectangle;
 import android.util.DisplayMetrics;
-import android.util.Size;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
@@ -39,6 +44,9 @@ public class Button {
                     0, 1, 2, 0, 2, 3
             };
 
+    private Rect bounds;
+
+    Runnable onPress;
 
     static {
         String vShaderStr =
@@ -84,14 +92,47 @@ public class Button {
         samplerLoc = GLES20.glGetUniformLocation(programObject, "s_texture");
     }
 
-    public Button(Size size, Point position, String text, DisplayMetrics metrics) {
-        //Float scale = metrics.density;
-        texture = Bitmap.createBitmap(metrics, metrics.widthPixels, 100, Bitmap.Config.ARGB_8888);
+    public boolean pointIsIn(int x, int y) {
+        return bounds.contains(x, y);
+    }
+
+    public Button(float width, float height, float x, float y, String text, DisplayMetrics metrics, Runnable onPress) {
+        this.onPress = onPress;
+
+        float heightHalf = (metrics.widthPixels / 2);
+        float widthHalf = (metrics.heightPixels / 2);
+
+        float xPos = ((y * metrics.widthPixels) - heightHalf) / heightHalf;
+        float yPos = ((x * metrics.heightPixels) - widthHalf) / widthHalf;
+        float tempWidth = width;
+        width = height;
+        height = tempWidth * 2;
+        width = width * ((float) metrics.heightPixels / (float) metrics.widthPixels) * 2;
+
+        int screenPosX = (int) (((xPos + 1f) / 2f) * metrics.widthPixels);
+        int screenPosY = (int) (((yPos + 1f) / 2f) * metrics.heightPixels);
+
+        int screenWidth = (int) ((width / 2f) * metrics.widthPixels);
+        int screenHeight = (int) ((height / 2f) * metrics.heightPixels);
+
+        Float scale = metrics.density;
+        texture = Bitmap.createBitmap(metrics, screenHeight, screenWidth, Bitmap.Config.ARGB_8888);
 
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(Color.RED);
+        paint.setColor(Color.argb(100, 0, 0, 0));
         Canvas canvas = new Canvas(texture);
         canvas.drawRect(0, 0, texture.getWidth(), texture.getHeight(), paint);
+        paint.setColor(Color.WHITE);
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        paint.setTextSize((int) (40 * scale));
+
+        Rect bounds = new Rect();
+        paint.getTextBounds(text, 0, text.length(), bounds);
+        int textX = (texture.getWidth() - bounds.width())/2;
+        int textY = (texture.getHeight() + bounds.height())/2;
+
+        canvas.drawText(text, textX, textY, paint);
+        //canvas.drawRect(0, 0, texture.getWidth(), texture.getHeight() / 2, paint);
 
         int[] textureIds = new int[1];
 
@@ -108,21 +149,45 @@ public class Button {
 
         textureId = textureIds[0];
 
-        float heightHalf = (metrics.heightPixels / 2);
-        float widthHalf = (metrics.widthPixels / 2);
-
-        float xPos = (position.y - heightHalf) / heightHalf;
-        float yPos = (position.x - widthHalf) / widthHalf;
-        float width = size.getHeight() / heightHalf;
-        float height = size.getWidth() / widthHalf;
+        this.bounds = new Rect(screenPosX, screenPosY, screenWidth + screenPosX, screenHeight + screenPosY);
 
         verticesData = new float[] {
-
+                xPos, yPos + height, 0f,
+                1f, 0f,
+                xPos, yPos, 0f,
+                0f, 0f,
+                xPos + width, yPos, 0f,
+                0f, 1f,
+                xPos + width, yPos + height, 0f,
+                1f, 1f
         };
+
+        vertices = ByteBuffer.allocateDirect(verticesData.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        vertices.put(verticesData).position(0);
+        indices = ByteBuffer.allocateDirect(indicesData.length * 2).order(ByteOrder.nativeOrder()).asShortBuffer();
+        indices.put(indicesData).position(0);
     }
 
     public void draw() {
+        GLES20.glUseProgram(programObject);
 
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        GLES20.glEnable(GLES20.GL_BLEND);
+
+        vertices.position(0);
+        GLES20.glVertexAttribPointer(positionLoc, 3, GLES20.GL_FLOAT, false, 5*4, vertices);
+        vertices.position(3);
+        GLES20.glVertexAttribPointer(texCoordLoc, 2, GLES20.GL_FLOAT, false, 5*4, vertices);
+
+        GLES20.glEnableVertexAttribArray(positionLoc);
+        GLES20.glEnableVertexAttribArray(texCoordLoc);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+
+        GLES20.glUniform1i(samplerLoc, 0);
+
+        GLES20.glDrawElements ( GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_SHORT, indices );
     }
 
 }

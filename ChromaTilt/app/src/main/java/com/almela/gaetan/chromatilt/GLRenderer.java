@@ -2,12 +2,14 @@ package com.almela.gaetan.chromatilt;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.media.Image;
 import android.media.ImageReader;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.util.DisplayMetrics;
+import android.util.Size;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -62,6 +64,8 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
     MainActivity activity;
 
     List<Button> buttons;
+
+    boolean menuOpen = false;
 
     public GLRenderer(MainActivity activity) {
         this.activity = activity;
@@ -153,6 +157,44 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
 
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
     {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        this.buttons.add(new Button(1f, 0.2f, 0, 0.1f, "Protanopia", displayMetrics, new Runnable() {
+            @Override
+            public void run() {
+                LSlider = 1f;
+                MSlider = 0f;
+                SSlider = 0f;
+            }
+        }));
+
+        this.buttons.add(new Button(1f, 0.2f, 0, 0.3f, "Deuteranopia", displayMetrics, new Runnable() {
+            @Override
+            public void run() {
+                LSlider = 0f;
+                MSlider = 1f;
+                SSlider = 0f;
+            }
+        }));
+
+        this.buttons.add(new Button(1f, 0.2f, 0, 0.5f, "Tritanopia", displayMetrics, new Runnable() {
+            @Override
+            public void run() {
+                LSlider = 0f;
+                MSlider = 0f;
+                SSlider = 1f;
+            }
+        }));
+
+        this.buttons.add(new Button(1f, 0.2f, 0, 0.7f, "Normal", displayMetrics, new Runnable() {
+            @Override
+            public void run() {
+                LSlider = 0f;
+                MSlider = 0f;
+                SSlider = 0f;
+            }
+        }));
+
         String vShaderStr = readFile("shader.vert");
         String fShaderStr = readFile("shader.frag");
 
@@ -219,6 +261,12 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
         GLES20.glUniform1i ( mSamplerLoc, 0 );
 
         GLES20.glDrawElements ( GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_SHORT, mIndices );
+
+        if(menuOpen) {
+            for (Button b : buttons) {
+                b.draw();
+            }
+        }
     }
 
     public void onSurfaceChanged(GL10 glUnused, int width, int height)

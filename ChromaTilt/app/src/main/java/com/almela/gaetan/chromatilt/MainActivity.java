@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ImageFormat;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -43,7 +44,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private FilterGLSurfaceView mSurfaceView;
-    private GLRenderer renderer;
+    protected GLRenderer renderer;
     private Size mPreviewSize;
     private String mCameraId;
     private CameraDevice mCameraDevice;
@@ -84,6 +85,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         renderer = new GLRenderer(this);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
         mSurfaceView = new FilterGLSurfaceView(this);
         mSurfaceView.setEGLContextClientVersion(2);
         mSurfaceView.setRenderer(renderer);
