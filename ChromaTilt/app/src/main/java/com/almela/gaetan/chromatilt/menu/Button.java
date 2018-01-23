@@ -1,4 +1,4 @@
-package com.almela.gaetan.chromatilt;
+package com.almela.gaetan.chromatilt.menu;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -47,6 +47,12 @@ public class Button {
     private Rect bounds;
 
     Runnable onPress;
+
+    float xPos;
+    float yPos;
+
+    float width;
+    float height;
 
     static {
         String vShaderStr =
@@ -102,12 +108,12 @@ public class Button {
         float heightHalf = (metrics.widthPixels / 2);
         float widthHalf = (metrics.heightPixels / 2);
 
-        float xPos = ((y * metrics.widthPixels) - heightHalf) / heightHalf;
-        float yPos = ((x * metrics.heightPixels) - widthHalf) / widthHalf;
+        xPos = ((y * metrics.widthPixels) - heightHalf) / heightHalf;
+        yPos = ((x * metrics.heightPixels) - widthHalf) / widthHalf;
         float tempWidth = width;
         width = height;
-        height = tempWidth * 2;
-        width = width * ((float) metrics.heightPixels / (float) metrics.widthPixels) * 2;
+        this.height = tempWidth * 2;
+        this.width = width * ((float) metrics.heightPixels / (float) metrics.widthPixels) * 2;
 
         int screenPosX = (int) (((xPos + 1f) / 2f) * metrics.widthPixels);
         int screenPosY = (int) (((yPos + 1f) / 2f) * metrics.heightPixels);
@@ -151,24 +157,27 @@ public class Button {
 
         this.bounds = new Rect(screenPosX, screenPosY, screenWidth + screenPosX, screenHeight + screenPosY);
 
+        indices = ByteBuffer.allocateDirect(indicesData.length * 2).order(ByteOrder.nativeOrder()).asShortBuffer();
+        indices.put(indicesData).position(0);
+    }
+
+    public void draw(float xOff) {
+        xOff = 0;
+
         verticesData = new float[] {
-                xPos, yPos + height, 0f,
+                xPos + xOff, yPos + height, 0f,
                 1f, 0f,
-                xPos, yPos, 0f,
+                xPos + xOff, yPos, 0f,
                 0f, 0f,
-                xPos + width, yPos, 0f,
+                xPos + width + xOff, yPos, 0f,
                 0f, 1f,
-                xPos + width, yPos + height, 0f,
+                xPos + width + xOff, yPos + height, 0f,
                 1f, 1f
         };
 
         vertices = ByteBuffer.allocateDirect(verticesData.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
         vertices.put(verticesData).position(0);
-        indices = ByteBuffer.allocateDirect(indicesData.length * 2).order(ByteOrder.nativeOrder()).asShortBuffer();
-        indices.put(indicesData).position(0);
-    }
 
-    public void draw() {
         GLES20.glUseProgram(programObject);
 
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);

@@ -44,7 +44,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private FilterGLSurfaceView mSurfaceView;
-    protected GLRenderer renderer;
+    public GLRenderer renderer;
     private Size mPreviewSize;
     private String mCameraId;
     private CameraDevice mCameraDevice;
@@ -123,7 +123,17 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == CAMERA_REQUEST_CODE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                openCamera();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(1000l);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        openCamera();
+                    }
+                }).start();
             else
                 Toast.makeText(this, "Camera permission denied", Toast.LENGTH_LONG).show();
         }

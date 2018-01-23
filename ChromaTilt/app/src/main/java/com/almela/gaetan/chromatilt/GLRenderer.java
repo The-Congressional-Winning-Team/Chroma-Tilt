@@ -2,14 +2,14 @@ package com.almela.gaetan.chromatilt;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.media.Image;
 import android.media.ImageReader;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.util.DisplayMetrics;
-import android.util.Size;
+
+import com.almela.gaetan.chromatilt.menu.Button;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -67,22 +67,54 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
 
     boolean menuOpen = false;
 
+    float xOff = 2f;
+
+    boolean opening = false;
+
     public GLRenderer(MainActivity activity) {
         this.activity = activity;
         buttons = new ArrayList<>();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    if (opening && xOff > 0f) {
+                        xOff -= 0.05;
+                        if (xOff < 0)
+                            xOff = 0;
+                        try {
+                            Thread.sleep(50l);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (!opening && xOff <= 2f) {
+                        xOff += 0.05f;
+                        if (xOff > 2f)
+                            xOff = 2f;
+                        try {
+                            Thread.sleep(50l);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }).start();
     }
 
     public void setAspectRatio(DisplayMetrics displayMetrics, float aspectRatio) {
-        float xOff = ((float)displayMetrics.heightPixels * aspectRatio) / (float) displayMetrics.widthPixels;
+        float yOff = ((float) displayMetrics.widthPixels * (1f/aspectRatio)) / displayMetrics.heightPixels;
+
         mVerticesData =
                 new float[] {
-                        -xOff, 1f, 0.0f,
+                        -1f, yOff, 0.0f,
                         0.0f, 0.0f,
-                        -xOff, -1f, 0.0f,
+                        -1f, -yOff, 0.0f,
                         0.0f, 1.0f,
-                        xOff, -1f, 0.0f,
+                        1f, -yOff, 0.0f,
                         1.0f, 1.0f,
-                        xOff, 1f, 0.0f,
+                        1f, yOff, 0.0f,
                         1.0f, 0.0f
                 };
         mVertices = ByteBuffer.allocateDirect(mVerticesData.length * 4)
@@ -264,7 +296,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
 
         if(menuOpen) {
             for (Button b : buttons) {
-                b.draw();
+                b.draw(xOff);
             }
         }
     }
