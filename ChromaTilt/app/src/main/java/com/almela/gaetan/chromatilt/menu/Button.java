@@ -157,27 +157,25 @@ public class Button {
 
         this.bounds = new Rect(screenPosX, screenPosY, screenWidth + screenPosX, screenHeight + screenPosY);
 
-        indices = ByteBuffer.allocateDirect(indicesData.length * 2).order(ByteOrder.nativeOrder()).asShortBuffer();
-        indices.put(indicesData).position(0);
-    }
-
-    public void draw(float xOff) {
-        xOff = 0;
-
         verticesData = new float[] {
-                xPos + xOff, yPos + height, 0f,
+                xPos, yPos + height, 0f,
                 1f, 0f,
-                xPos + xOff, yPos, 0f,
+                xPos, yPos, 0f,
                 0f, 0f,
-                xPos + width + xOff, yPos, 0f,
+                xPos + width, yPos, 0f,
                 0f, 1f,
-                xPos + width + xOff, yPos + height, 0f,
+                xPos + width, yPos + height, 0f,
                 1f, 1f
         };
 
+        indices = ByteBuffer.allocateDirect(indicesData.length * 2).order(ByteOrder.nativeOrder()).asShortBuffer();
+        indices.put(indicesData).position(0);
+
         vertices = ByteBuffer.allocateDirect(verticesData.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
         vertices.put(verticesData).position(0);
+    }
 
+    public void draw() {
         GLES20.glUseProgram(programObject);
 
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
