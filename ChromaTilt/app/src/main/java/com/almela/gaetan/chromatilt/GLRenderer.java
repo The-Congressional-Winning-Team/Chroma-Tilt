@@ -8,6 +8,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.util.DisplayMetrics;
+import android.view.GestureDetector;
 
 import com.almela.gaetan.chromatilt.menu.Button;
 import com.almela.gaetan.chromatilt.menu.Menu;
@@ -190,6 +191,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
     {
         menu = new Menu(activity);
+        activity.mSurfaceView.gestureDetector = new GestureDetector(activity, this.menu);
 
         String vShaderStr = readFile("shader.vert");
         String fShaderStr = readFile("shader.frag");

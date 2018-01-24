@@ -13,12 +13,19 @@ import com.almela.gaetan.chromatilt.menu.Button;
 
 public class FilterGLSurfaceView extends GLSurfaceView {
 
+    MainActivity activity;
+
+    GestureDetector gestureDetector;
+
     public FilterGLSurfaceView(Context context) {
         super(context);
+        this.activity = (MainActivity) context;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        return true;
+        boolean consumed = gestureDetector.onTouchEvent(e);
+        System.out.println(consumed);
+        return consumed;
     }
 }

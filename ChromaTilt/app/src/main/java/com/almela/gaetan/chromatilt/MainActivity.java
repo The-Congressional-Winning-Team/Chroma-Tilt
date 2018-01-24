@@ -43,7 +43,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private FilterGLSurfaceView mSurfaceView;
+    public FilterGLSurfaceView mSurfaceView;
     public GLRenderer renderer;
     private Size mPreviewSize;
     private String mCameraId;

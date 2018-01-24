@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import com.almela.gaetan.chromatilt.GLRenderer;
 import com.almela.gaetan.chromatilt.MainActivity;
@@ -16,22 +17,17 @@ import java.util.List;
  * Created by Willg on 1/22/2018.
  */
 
-public class Menu {
+public class Menu extends GestureDetector.SimpleOnGestureListener {
 
     List<Button> buttons;
-
-    GestureDetector gestureDetector;
 
     MainActivity activity;
 
     GLRenderer renderer;
 
     public Menu(Context context) {
-        Looper.prepare();
         this.activity = (MainActivity) context;
         this.renderer = this.activity.renderer;
-        gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-        });
         buttons = new ArrayList<>();
         DisplayMetrics displayMetrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -72,14 +68,22 @@ public class Menu {
         }));
     }
 
-    public boolean onTouchEvent(MotionEvent e) {
-        return gestureDetector.onTouchEvent(e);
-    }
-
     public void draw() {
         for (Button b : buttons) {
             b.draw();
         }
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        Toast.makeText(activity, "Touch", Toast.LENGTH_SHORT).show();
+        for (Button b : buttons) {
+            if (b.pointIsIn((int) e.getX(), (int) e.getY())) {
+                b.onPress.run();
+                return true;
+            }
+        }
+        return false;
     }
 
 }

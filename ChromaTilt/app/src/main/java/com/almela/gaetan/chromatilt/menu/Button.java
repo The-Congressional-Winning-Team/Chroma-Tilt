@@ -118,8 +118,8 @@ public class Button {
         int screenPosX = (int) (((xPos + 1f) / 2f) * metrics.widthPixels);
         int screenPosY = (int) (((yPos + 1f) / 2f) * metrics.heightPixels);
 
-        int screenWidth = (int) ((width / 2f) * metrics.widthPixels);
-        int screenHeight = (int) ((height / 2f) * metrics.heightPixels);
+        int screenWidth = (int) ((this.width / 2f) * metrics.widthPixels);
+        int screenHeight = (int) ((this.height / 2f) * metrics.heightPixels);
 
         Float scale = metrics.density;
         texture = Bitmap.createBitmap(metrics, screenHeight, screenWidth, Bitmap.Config.ARGB_8888);
@@ -158,13 +158,13 @@ public class Button {
         this.bounds = new Rect(screenPosX, screenPosY, screenWidth + screenPosX, screenHeight + screenPosY);
 
         verticesData = new float[] {
-                xPos, yPos + height, 0f,
+                xPos, yPos + this.height, 0f,
                 1f, 0f,
                 xPos, yPos, 0f,
                 0f, 0f,
-                xPos + width, yPos, 0f,
+                xPos + this.width, yPos, 0f,
                 0f, 1f,
-                xPos + width, yPos + height, 0f,
+                xPos + this.width, yPos + this.height, 0f,
                 1f, 1f
         };
 
