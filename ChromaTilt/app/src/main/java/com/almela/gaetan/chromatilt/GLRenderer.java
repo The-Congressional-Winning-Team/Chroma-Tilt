@@ -110,13 +110,13 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
         mVerticesData =
                 new float[] {
                         -1f, yOff, 0.0f,
-                        0.0f, 0.0f,
-                        -1f, -yOff, 0.0f,
-                        0.0f, 1.0f,
-                        1f, -yOff, 0.0f,
                         1.0f, 1.0f,
+                        -1f, -yOff, 0.0f,
+                        1.0f, 0.0f,
+                        1f, -yOff, 0.0f,
+                        0.0f, 0.0f,
                         1f, yOff, 0.0f,
-                        1.0f, 0.0f
+                        0.0f, 1.0f
                 };
         mVertices = ByteBuffer.allocateDirect(mVerticesData.length * 4)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -166,35 +166,12 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
         mTextureId = textureId[0];
     }
 
-    private String readFile(String file) {
-        BufferedReader reader = null;
-        String fileContents = "";
-        try {
-            reader = new BufferedReader(new InputStreamReader(activity.getAssets().open(file)));
-            String mLine;
-            while ((mLine = reader.readLine()) != null) {
-                fileContents += mLine + "\n";
-            }
-        } catch(IOException e) {
-            e.printStackTrace();
-        } finally {
-            if(reader != null)
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-        }
-        return fileContents;
-    }
-
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
     {
         menu = new Menu(activity);
-        activity.mSurfaceView.gestureDetector = new GestureDetector(activity, this.menu);
 
-        String vShaderStr = readFile("shader.vert");
-        String fShaderStr = readFile("shader.frag");
+        String vShaderStr = activity.readFile("shader.vert");
+        String fShaderStr = activity.readFile("shader.frag");
 
         int vShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         GLES20.glShaderSource(vShader, vShaderStr);

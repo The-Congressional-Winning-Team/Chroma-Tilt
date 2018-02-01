@@ -34,6 +34,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +83,27 @@ public class MainActivity extends AppCompatActivity {
     private Handler mBackgroundHandler;
     private ImageReader mImageReader;
 
+    public String readFile(String file) {
+        BufferedReader reader = null;
+        String fileContents = "";
+        try {
+            reader = new BufferedReader(new InputStreamReader(getAssets().open(file)));
+            String mLine;
+            while ((mLine = reader.readLine()) != null) {
+                fileContents += mLine + "\n";
+            }
+        } catch(IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(reader != null)
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+        return fileContents;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

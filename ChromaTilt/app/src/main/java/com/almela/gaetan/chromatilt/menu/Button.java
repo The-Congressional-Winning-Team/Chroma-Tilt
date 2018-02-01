@@ -28,12 +28,6 @@ public class Button {
 
     int textureId;
 
-    static int programObject;
-
-    static int positionLoc;
-    static int texCoordLoc;
-    static int samplerLoc;
-
     private FloatBuffer vertices;
     private ShortBuffer indices;
 
@@ -46,57 +40,13 @@ public class Button {
 
     private Rect bounds;
 
-    Runnable onPress;
+    public Runnable onPress;
 
     float xPos;
     float yPos;
 
     float width;
     float height;
-
-    static {
-        String vShaderStr =
-                "attribute vec4 a_position;   \n"
-                        + "attribute vec2 a_texCoord;   \n"
-                        + "varying vec2 v_texCoord;     \n"
-                        + "void main()                  \n"
-                        + "{                            \n"
-                        + "   gl_Position = a_position; \n"
-                        + "   v_texCoord = a_texCoord;  \n"
-                        + "}                            \n";
-
-        String fShaderStr =
-                "precision mediump float;                            \n"
-                        + "varying vec2 v_texCoord;                            \n"
-                        + "uniform sampler2D s_texture;                        \n"
-                        + "void main()                                         \n"
-                        + "{                                                   \n"
-                        + "  gl_FragColor = texture2D( s_texture, v_texCoord );\n"
-                        + "}                                                   \n";
-
-        int vShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
-        GLES20.glShaderSource(vShader, vShaderStr);
-        GLES20.glCompileShader(vShader);
-
-        int fShader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
-        GLES20.glShaderSource(fShader, fShaderStr);
-        GLES20.glCompileShader(fShader);
-
-        programObject = GLES20.glCreateProgram();
-
-        GLES20.glAttachShader(programObject, vShader);
-        GLES20.glAttachShader(programObject, fShader);
-
-        GLES20.glLinkProgram(programObject);
-
-        GLES20.glDeleteShader(vShader);
-        GLES20.glDeleteShader(fShader);
-
-        positionLoc = GLES20.glGetAttribLocation(programObject, "a_position");
-        texCoordLoc = GLES20.glGetAttribLocation(programObject, "a_texCoord");
-
-        samplerLoc = GLES20.glGetUniformLocation(programObject, "s_texture");
-    }
 
     public boolean pointIsIn(int x, int y) {
         return bounds.contains(x, y);
@@ -176,23 +126,21 @@ public class Button {
     }
 
     public void draw() {
-        GLES20.glUseProgram(programObject);
-
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         GLES20.glEnable(GLES20.GL_BLEND);
 
         vertices.position(0);
-        GLES20.glVertexAttribPointer(positionLoc, 3, GLES20.GL_FLOAT, false, 5*4, vertices);
+        GLES20.glVertexAttribPointer(Menu.positionLoc, 3, GLES20.GL_FLOAT, false, 5*4, vertices);
         vertices.position(3);
-        GLES20.glVertexAttribPointer(texCoordLoc, 2, GLES20.GL_FLOAT, false, 5*4, vertices);
+        GLES20.glVertexAttribPointer(Menu.texCoordLoc, 2, GLES20.GL_FLOAT, false, 5*4, vertices);
 
-        GLES20.glEnableVertexAttribArray(positionLoc);
-        GLES20.glEnableVertexAttribArray(texCoordLoc);
+        GLES20.glEnableVertexAttribArray(Menu.positionLoc);
+        GLES20.glEnableVertexAttribArray(Menu.texCoordLoc);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
 
-        GLES20.glUniform1i(samplerLoc, 0);
+        GLES20.glUniform1i(Menu.samplerLoc, 0);
 
         GLES20.glDrawElements ( GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_SHORT, indices );
     }
