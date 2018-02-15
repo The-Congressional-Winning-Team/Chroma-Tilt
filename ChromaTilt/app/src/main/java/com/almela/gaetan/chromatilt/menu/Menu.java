@@ -1,6 +1,7 @@
 package com.almela.gaetan.chromatilt.menu;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.opengl.GLES20;
 import android.os.Looper;
 import android.util.DisplayMetrics;
@@ -29,14 +30,16 @@ public class Menu {
     static int texCoordLoc;
     static int samplerLoc;
 
-    int xOffLoc;
+    static DisplayMetrics displayMetrics;
+
+    int yOffLoc;
 
     public Menu(Context context) {
         Looper.prepare();
         this.activity = (MainActivity) context;
         this.renderer = this.activity.renderer;
         buttons = new ArrayList<>();
-        DisplayMetrics displayMetrics = new DisplayMetrics();
+        displayMetrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         this.buttons.add(new Button(1f, 0.2f, 0, 0.1f, "Protanopia", displayMetrics, new Runnable() {
             @Override
@@ -98,7 +101,7 @@ public class Menu {
         positionLoc = GLES20.glGetAttribLocation(programObject, "a_position");
         texCoordLoc = GLES20.glGetAttribLocation(programObject, "a_texCoord");
 
-        xOffLoc = GLES20.glGetUniformLocation(programObject, "xOff");
+        yOffLoc = GLES20.glGetUniformLocation(programObject, "xOff");
 
         samplerLoc = GLES20.glGetUniformLocation(programObject, "s_texture");
     }
@@ -107,10 +110,19 @@ public class Menu {
         for (Button b : buttons) {
             GLES20.glUseProgram(programObject);
 
-            GLES20.glUniform1f(xOffLoc, 1);
+            GLES20.glUniform1f(yOffLoc, 0);
 
             b.draw();
         }
+    }
+
+    protected static float[] screenToOGL(int x, int y) {
+        float[] coord = new float[2];
+
+        coord[0] = ((float) x / (float) displayMetrics.widthPixels * 2) - 1;
+        coord[1] = ((float) y / (float) displayMetrics.heightPixels * 2) - 1;
+
+        return coord;
     }
 
 }

@@ -38,8 +38,6 @@ public class Button {
                     0, 1, 2, 0, 2, 3
             };
 
-    private Rect bounds;
-
     public Runnable onPress;
 
     float xPos;
@@ -49,27 +47,27 @@ public class Button {
     float height;
 
     public boolean pointIsIn(int x, int y) {
-        return bounds.contains(x, y);
+        float[] coord = Menu.screenToOGL(x,y);
+        return (coord[0] > xPos && coord[0] < (xPos + width)
+                && coord[1] > yPos && coord[1] < (yPos + height));
     }
 
     public Button(float width, float height, float x, float y, String text, DisplayMetrics metrics, Runnable onPress) {
         this.onPress = onPress;
+        this.width = width;
+        this.height = height;
 
-        float heightHalf = (metrics.widthPixels / 2);
-        float widthHalf = (metrics.heightPixels / 2);
+        float heightHalf = (metrics.heightPixels / 2);
+        float widthHalf = (metrics.widthPixels / 2);
 
-        xPos = ((y * metrics.widthPixels) - heightHalf) / heightHalf;
-        yPos = ((x * metrics.heightPixels) - widthHalf) / widthHalf;
-        float tempWidth = width;
-        width = height;
-        this.height = tempWidth * 2;
-        this.width = width * ((float) metrics.heightPixels / (float) metrics.widthPixels) * 2;
+        yPos = ((y * metrics.heightPixels) - heightHalf) / heightHalf;
+        xPos = ((x * metrics.widthPixels) - widthHalf) / widthHalf;
 
-        int screenPosX = (int) (((xPos + 1f) / 2f) * metrics.widthPixels);
-        int screenPosY = (int) (((yPos + 1f) / 2f) * metrics.heightPixels);
+        this.height *= ((float) metrics.widthPixels / (float) metrics.heightPixels) * 2;
+        this.width *= 2;
 
-        int screenWidth = (int) ((this.width / 2f) * metrics.widthPixels);
-        int screenHeight = (int) ((this.height / 2f) * metrics.heightPixels);
+        int screenWidth = (int) ((this.height / 2f) * metrics.heightPixels);
+        int screenHeight = (int) ((this.width / 2f) * metrics.widthPixels);
 
         Float scale = metrics.density;
         texture = Bitmap.createBitmap(metrics, screenHeight, screenWidth, Bitmap.Config.ARGB_8888);
@@ -105,17 +103,15 @@ public class Button {
 
         textureId = textureIds[0];
 
-        this.bounds = new Rect(screenPosX, screenPosY, screenWidth + screenPosX, screenHeight + screenPosY);
-
         verticesData = new float[] {
                 xPos, yPos + this.height, 0f,
-                1f, 0f,
-                xPos, yPos, 0f,
                 0f, 0f,
-                xPos + this.width, yPos, 0f,
+                xPos, yPos, 0f,
                 0f, 1f,
+                xPos + this.width, yPos, 0f,
+                1f, 1f,
                 xPos + this.width, yPos + this.height, 0f,
-                1f, 1f
+                1f, 0f
         };
 
         indices = ByteBuffer.allocateDirect(indicesData.length * 2).order(ByteOrder.nativeOrder()).asShortBuffer();

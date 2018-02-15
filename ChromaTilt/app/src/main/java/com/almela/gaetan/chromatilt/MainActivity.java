@@ -29,6 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Size;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.Window;
 import android.view.WindowManager;

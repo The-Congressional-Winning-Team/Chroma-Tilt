@@ -105,18 +105,18 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
     }
 
     public void setAspectRatio(DisplayMetrics displayMetrics, float aspectRatio) {
-        float yOff = ((float) displayMetrics.widthPixels * (1f/aspectRatio)) / displayMetrics.heightPixels;
+        float xOff = ((float) displayMetrics.heightPixels / aspectRatio) / displayMetrics.widthPixels;
 
         mVerticesData =
                 new float[] {
-                        -1f, yOff, 0.0f,
+                        -xOff, 1, 0.0f,
+                        0.0f, 1.0f,
+                        -xOff, -1, 0.0f,
                         1.0f, 1.0f,
-                        -1f, -yOff, 0.0f,
+                        xOff, -1, 0.0f,
                         1.0f, 0.0f,
-                        1f, -yOff, 0.0f,
-                        0.0f, 0.0f,
-                        1f, yOff, 0.0f,
-                        0.0f, 1.0f
+                        xOff, 1, 0.0f,
+                        0.0f, 0.0f
                 };
         mVertices = ByteBuffer.allocateDirect(mVerticesData.length * 4)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -127,6 +127,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, ImageReader.OnImageAv
 
         cameraImage = Bitmap.createBitmap((DisplayMetrics) null, 5, 5, Bitmap.Config.ARGB_8888);
     }
+
 
     @Override
     public void onImageAvailable(ImageReader reader) {
