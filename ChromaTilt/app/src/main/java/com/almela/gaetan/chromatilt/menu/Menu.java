@@ -121,6 +121,7 @@ public class Menu {
 
         coord[0] = ((float) x / (float) displayMetrics.widthPixels * 2) - 1;
         coord[1] = ((float) y / (float) displayMetrics.heightPixels * 2) - 1;
+        coord[1] *= -1;
 
         return coord;
     }
